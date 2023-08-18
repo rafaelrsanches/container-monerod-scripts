@@ -41,16 +41,6 @@ podman generate systemd --new --name monerod | sudo tee /etc/systemd/system/cont
 systemctl --user enable /etc/systemd/system/container-monerod.service
 systemctl --user start container-monerod.service
 
-
-## If you want to run a public pruned node comment the 2 commands above, and uncomment the commands below ##
-#podman create --name=monerod --restart=always \
-#    -p 18080:18080 -p 18089:18089 \
-#    -v bitmonero:/home/monero \
-#    docker.io/sethsimmons/simple-monerod:latest \
-#    --rpc-restricted-bind-ip=0.0.0.0 \
-#    --rpc-restricted-bind-port=18089 \
-#    --public-node --no-igd --no-zmq --enable-dns-blocklist --prune-blockchain
-
 ## To watch the logs for monerod, simply run ##
 journalctl --user-unit=container-monerod.service -f
 
