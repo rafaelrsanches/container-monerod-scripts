@@ -2,29 +2,30 @@
 
 ## A script to run a pruned monero node with podman on Fedora, using sethforprivacy docker image https://hub.docker.com/r/sethsimmons/simple-monerod ##
 
-## Update your system, install ufw and curl ##
+GREEN='\033[1;32m'
+NC='\033[0m' # No Color
 
-echo "Update your system, install ufw and curl"
+echo -e "${GREEN}Update your system, install ufw and curl${NC}"
 sudo dnf update -y
 sudo dnf install -y ufw curl
 
-## Deny all non-explicitly allowed ports ##
+echo -e "${GREEN}Deny all non-explicitly allowed ports${NC}"
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 
-## Allow SSH access ##
+echo -e "${GREEN}Allow SSH access${NC}"
 sudo ufw allow ssh
 
-## Allow monerod p2p port ##
+echo -e "${GREEN}Allow monerod p2p port${NC}"
 sudo ufw allow 18080/tcp
 
-## Allow monerod restricted RPC port ##
+echo -e "${GREEN}Allow monerod restricted RPC port${NC}"
 sudo ufw allow 18089/tcp
 
-## Enable UFW ##
+echo -e "${GREEN}Enable UFW${NC}"
 sudo ufw enable
 
-## Download and create a pruned monerod via Podman ##
+echo -e "${GREEN}Download container image and create a pruned monerod with Podman${NC}"
 podman create --name=monerod --restart=always \
     -p 18080:18080 -p 18089:18089 \
     -v bitmonero:/home/monero \
@@ -34,15 +35,20 @@ podman create --name=monerod --restart=always \
     --rpc-restricted-bind-port=18089 \
     --no-igd --no-zmq --enable-dns-blocklist --prune-blockchain
     
-## Create systemd service unit file for monerod ##
+echo -e "${GREEN}Create systemd service unit file for monerod${NC}"
 podman generate systemd --new --name monerod | sudo tee /etc/systemd/system/container-monerod.service
 
-# Enable and start the monerod systemd service at user level
+echo -e "${GREEN}Enable and start the monerod systemd service at user level${NC}"
 systemctl --user enable /etc/systemd/system/container-monerod.service
 systemctl --user start container-monerod.service
 
+echo -e "${GREEN}Connect to your node using this address and port 127.0.0.1:18089${NC}"
+
 ## To watch the logs for monerod, simply run ##
 journalctl --user-unit=container-monerod.service -f
+
+## Connect to your node using this address and port ##
+#127.0.0.1:18089
 
 ## To check the status of the monerod, simply run ##
 #podman exec -it monerod monerod status
