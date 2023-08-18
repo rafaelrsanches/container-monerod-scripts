@@ -63,9 +63,10 @@ sudo podman generate systemd --new --name watchtower | sudo tee /etc/systemd/sys
 ## Enable and start the watchtower systemd service ##
 sudo systemctl enable container-watchtower.service
 sudo systemctl start container-watchtower.service
-    
+
+
 ## If you want to run a public pruned node comment the 2 commands above, and uncomment the commands below ##
-#podman run -d --name=monerod --restart=always \
+#podman create --name=monerod --restart=always \
 #    -p 18080:18080 -p 18089:18089 \
 #    -v bitmonero:/home/monero \
 #    docker.io/sethsimmons/simple-monerod:latest \
@@ -73,13 +74,12 @@ sudo systemctl start container-watchtower.service
 #    --rpc-restricted-bind-port=18089 \
 #    --public-node --no-igd --no-zmq --enable-dns-blocklist --prune-blockchain
 #
-#podman run -d --name=watchtower --restart=always \
+#sudo podman create --name=watchtower --restart=always \
 #    -v /var/run/podman/podman.sock:/var/run/podman/podman.sock \
 #    docker.io/containrrr/watchtower --cleanup \
 #    --monitor-only \
 #    --interval 300 \
 #    monerod tor
-
 
 ## To watch the logs for monerod, simply run ##
 journalctl -u container-monerod.service -f
