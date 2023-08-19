@@ -1,5 +1,5 @@
 #  container-monerod-scripts
-Scripts to run monerod on a container
+Scripts to run monerod on a container using SethForPrivacy docker image https://hub.docker.com/r/sethsimmons/simple-monerod
 
 ## Download the script
 ```
