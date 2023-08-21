@@ -31,6 +31,7 @@ podman network create monerod-network
 
 echo -e "${GREEN}Download container image and create a pruned monerod with Podman${NC}"
 podman create --name=monerod --restart=always \
+    --network monerod-network \
     -p 18080:18080 -p 18089:18089 \
     -v bitmonero:/home/monero \
     -l "io.containers.autoupdate=registry" \
@@ -46,6 +47,9 @@ podman generate systemd --new --name monerod > ~/.config/systemd/user/container-
 echo -e "${GREEN}Enable and start the monerod systemd service at user level${NC}"
 systemctl --user enable ~/.config/systemd/user/container-monerod.service
 systemctl --user start container-monerod.service
+
+## Wait to monerod to start ##
+sleep 60
 
 echo -e "${GREEN}Connect to your node using this address and port 127.0.0.1:18089${NC}"
 
@@ -66,6 +70,9 @@ podman generate systemd --new --name tor > ~/.config/systemd/user/container-tor.
 echo -e "${GREEN}Enable and start the tor hidden service systemd service at user level${NC}"
 systemctl --user enable ~/.config/systemd/user/container-tor.service
 systemctl --user start container-tor.service
+
+## Wait to tor hidden service to start ##
+sleep 60
 
 onion_address=$(podman exec -it tor cat /var/lib/tor/hidden_service/monerod/hostname | tr -d '\r')
 full_onion_address="${onion_address}:18089"
