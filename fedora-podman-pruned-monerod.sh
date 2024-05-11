@@ -80,6 +80,33 @@ echo "${full_onion_address}" > ~/Documents/OnionNodeAddress.txt
 echo -e "${GREEN}${full_onion_address} is your node address on tor, and you can access it on ~/Documents/OnionNodeAddress.txt${NC}"
 
 echo -e "${GREEN}Configuration completed, to watch the logs for monerod, simply run 'journalctl --user-unit=container-monerod.service -f' ${NC}"
+
+echo -e "${GREEN}Download container image and create the i2pd service with Podman${NC}"
+podman create --name=i2pd --restart=always \
+    --network monerod-network \
+    -v i2pd-keys:/home/i2pd/data/ \
+    -l "io.containers.autoupdate=registry" \
+    docker.io/purplei2p/i2pd
+
+
+echo -e "${GREEN}Create systemd service unit file at user level for i2pd service${NC}"
+podman generate systemd --new --name i2pd > ~/.config/systemd/user/container-i2pd.service
+
+echo -e "${GREEN}Enable and start the i2pd service systemd service at user level${NC}"
+systemctl --user enable ~/.config/systemd/user/container-i2pd.service
+systemctl --user start container-i2pd.service
+podman exec -it i2pd sh -c 'echo -e "[monerod-p2p]\ntype = http\nhost = monerod\nport = 18080\nkeys = monerod.dat\n\n[monerod-rpc]\ntype = http\nhost = monerod\nport = 18089\nkeys = monerod.dat" > /home/i2pd/data/tunnels.conf'
+systemctl --user restart container-i2pd.service
+
+## Wait to tor hidden service to start ##
+sleep 60
+
+i2pd_address=$(podman exec -it i2pd cat /home/i2pd/data/ | tr -d '\r')
+full_i2pd_address="${i2pd_address}:18089"
+echo "${full_i2pd_address}" > ~/Documents/I2PNodeAddress.txt
+echo -e "${GREEN}${full_i2pd_address} is your node address on i2p, and you can access it on ~/Documents/I2PNodeAddress.txt${NC}"
+
+echo -e "${GREEN}Configuration completed, to watch the logs for monerod, simply run 'journalctl --user-unit=container-monerod.service -f' ${NC}"
 ## journalctl --user-unit=container-monerod.service -f
 
 ## podman exec -it tor onions
